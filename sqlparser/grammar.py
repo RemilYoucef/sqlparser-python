@@ -130,20 +130,14 @@ def p_order(p):
     """ order : order COMMA order
               | string order_type
     """
-    if len(p) > 3:
-        p[0] = p[1] + p[3]
-    else:
-        p[0] = [{'name': p[1],'type': p[2]}]
+    p[0] = p[1] + p[3] if len(p) > 3 else [{'name': p[1],'type': p[2]}]
 
 def p_order_type(p):
     """ order_type : ASC
                    | DESC
                    | empty
     """
-    if p[1] == 'DESC':
-        p[0] = 'DESC'
-    else:
-        p[0] = 'ASC'
+    p[0] = 'DESC' if p[1] == 'DESC' else 'ASC'
 
 
 ###################################################
@@ -163,10 +157,7 @@ def p_set(p):
     """ set : set COMMA set
             | item COMPARISON item
     """
-    if '=' in p:
-        p[0] = [{'name':p[1],'value':p[3]}]
-    else:
-        p[0] = p[1] + p[3]
+    p[0] = [{'name':p[1],'value':p[3]}] if '=' in p else p[1] + p[3]
 
 ###################################################
 ############         insert            ############
@@ -200,19 +191,13 @@ def p_value(p):
               | string
               | NUMBER
     """
-    if len(p) > 2:
-        p[0] = p[1] + p[3]
-    else:
-        p[0] = [p[1]]
+    p[0] = p[1] + p[3] if len(p) > 2 else [p[1]]
 
 def p_values(p):
     """ values : values COMMA values
                | "(" value ")"
     """
-    if ',' in p:
-        p[0] = p[1] + p[3]
-    else:
-        p[0] = [p[2]]
+    p[0] = p[1] + p[3] if ',' in p else [p[2]]
 
 ###################################################
 ############         delete            ############
@@ -243,10 +228,7 @@ def p_create_columns(p):
     """ create_columns : create_columns COMMA create_columns
                        | string datatype
     """
-    if len(p) > 3:
-        p[0] = p[1] + p[3]
-    else:
-        p[0] = [{'name':p[1],'type':p[2]}]
+    p[0] = p[1] + p[3] if len(p) > 3 else [{'name':p[1],'type':p[2]}]
 
 def p_datatype(p):
     """ datatype : INT
@@ -261,10 +243,7 @@ def p_datatype(p):
                  | CHAR "(" NUMBER ")"
                  | VARCHAR "(" NUMBER ")"
     """
-    if len(p) > 2:
-        p[0] = '%s(%s)'%(p[1],p[3])
-    else:
-        p[0] = p[1]
+    p[0] = f'{p[1]}({p[3]})' if len(p) > 2 else p[1]
 
 ###################################################
 ############         alter              ###########
@@ -311,20 +290,14 @@ def p_columns(p):
                 | column
     """
 
-    if len(p) > 2:
-        p[0] = p[1] + p[3]
-    else:
-        p[0] = [p[1]]
+    p[0] = p[1] + p[3] if len(p) > 2 else [p[1]]
 
 def p_column_as(p):
     """ column_as : column AS item
                   | column item
     """
     p[0] = p[1]
-    if len(p) > 3:
-        p[0]['alias'] = p[3]
-    else:
-        p[0]['alias'] = p[2]
+    p[0]['alias'] = p[3] if len(p) > 3 else p[2]
 
 def p_column(p):
     """ column : function "(" distinct_item ")"
@@ -332,19 +305,13 @@ def p_column(p):
                | distinct_item
                | item
     """
-    if len(p) > 2:
-        p[0] = {'name': {p[1]:p[3]}}
-    else:
-        p[0] = {'name':p[1]}
+    p[0] = {'name': {p[1]:p[3]}} if len(p) > 2 else {'name':p[1]}
 
 def p_distinct_item(p):
     """ distinct_item : DISTINCT item
                       | DISTINCT "(" item ")"
     """
-    if len(p) > 3:
-        p[0] = {p[1]:p[3]}
-    else:
-        p[0] = {p[1]:p[2]}
+    p[0] = {p[1]:p[3]} if len(p) > 3 else {p[1]:p[2]}
 
 def p_function(p):
     """ function : COUNT
@@ -361,10 +328,7 @@ def p_item(p):
              | "*"
              | string "." item
     """
-    if len(p)>2:
-        p[0] = p[1]+'.'+p[3]
-    else:
-        p[0] = p[1]
+    p[0] = f'{p[1]}.{p[3]}' if len(p)>2 else p[1]
 
 
 # p[0] => [1,2] | [1]
@@ -372,19 +336,13 @@ def p_numbers(p):
     """ numbers : numbers COMMA numbers
                 | NUMBER
     """
-    if len(p) > 2:
-        p[0] = p[1] + p[3]
-    else:
-        p[0] = [p[1]]
+    p[0] = p[1] + p[3] if len(p) > 2 else [p[1]]
 
 def p_strings(p):
     """ strings : strings COMMA strings
                 | string
     """
-    if len(p) > 2:
-        p[0] = p[1] + p[3]
-    else:
-        p[0] = [p[1]]
+    p[0] = p[1] + p[3] if len(p) > 2 else [p[1]]
 
 def p_items(p):
     """ items : strings
@@ -409,10 +367,7 @@ def p_conditions(p):
     if len(p) == 2:
         p[0] = [p[1]]
     else:
-        if '(' in p:
-            p[0] = [p[2]]
-        else:
-            p[0] = p[1] + [p[2]] + p[3]
+        p[0] = [p[2]] if '(' in p else p[1] + [p[2]] + p[3]
 
 def p_compare(p):
     """ compare : column COMPARISON item
@@ -443,28 +398,19 @@ def p_like(p):
     """ like : LIKE
              | NOT LIKE
     """
-    if len(p) == 2:
-        p[0] = 'LIKE'
-    else:
-        p[0] = 'NOT LIKE'
+    p[0] = 'LIKE' if len(p) == 2 else 'NOT LIKE'
 
 def p_in(p):
     """ in : IN
            | NOT IN
     """
-    if len(p) == 2:
-        p[0] = 'IN'
-    else:
-        p[0] = 'NOT IN'
+    p[0] = 'IN' if len(p) == 2 else 'NOT IN'
 
 def p_null(p):
     """ null : NULL
              | NOT NULL
     """
-    if len(p) == 2:
-        p[0] = 'NULL'
-    else:
-        p[0] = 'NOT NULL'
+    p[0] = 'NULL' if len(p) == 2 else 'NOT NULL'
 
 # empty return None
 # so expression like (t : empty) => len(p)==2
